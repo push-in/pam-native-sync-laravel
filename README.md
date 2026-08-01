@@ -2,6 +2,12 @@
 
 The production Laravel counterpart for `pushinbr/pam-native-sync`: authenticated incremental pulls, idempotent mutation ingestion, HMAC-signed cursors, conflict responses, collection registration, retention boundaries, and a PAM Native transport adapter.
 
+```bash
+composer require pushinbr/pam-native-laravel-sync
+php artisan vendor:publish --tag=pam-native-sync-config
+php artisan migrate
+```
+
 ```php
 // AppServiceProvider.php
 $registry->register('notes', new NotesSyncHandler());
