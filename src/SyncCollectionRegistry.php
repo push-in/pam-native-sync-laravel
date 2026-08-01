@@ -1,0 +1,3 @@
+<?php
+declare(strict_types=1);namespace Pam\Native\LaravelSync;use InvalidArgumentException;use Pam\Native\LaravelSync\Contracts\SyncCollectionHandler;
+final class SyncCollectionRegistry{/** @var array<string,SyncCollectionHandler> */private array$handlers=[];public function register(SyncCollectionHandler $handler):void{$name=$handler->collection();if(preg_match('/^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$/D',$name)!==1)throw new InvalidArgumentException('Invalid sync collection name.');$this->handlers[$name]=$handler;}public function get(string$collection):SyncCollectionHandler{return $this->handlers[$collection]??throw new InvalidArgumentException("No sync handler registered for {$collection}.");}}

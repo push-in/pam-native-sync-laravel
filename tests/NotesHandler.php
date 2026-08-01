@@ -1,0 +1,3 @@
+<?php
+declare(strict_types=1);namespace Pam\Native\LaravelSync\Tests;use Pam\Native\LaravelSync\Contracts\SyncCollectionHandler;use Pam\Native\LaravelSync\Domain\AppliedChange;use Pam\Native\LaravelSync\Domain\IncomingOperation;use Pam\Native\LaravelSync\Domain\SyncConflictException;
+final class NotesHandler implements SyncCollectionHandler{public int$calls=0;public function collection():string{return'notes';}public function apply(string$subjectIdentifier,IncomingOperation$operation):AppliedChange{$this->calls++;if($operation->baseVersion===99)throw new SyncConflictException('Version conflict.');return new AppliedChange('notes',$operation->recordIdentifier,$operation->kind,$operation->payload,$operation->baseVersion+1,1_800_000_000_000+$this->calls);}}
