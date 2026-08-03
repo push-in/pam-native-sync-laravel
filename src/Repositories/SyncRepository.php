@@ -23,14 +23,63 @@ final readonly class SyncRepository
         return $row ? new PushOutcome($operation, OperationStatus::from((int)$row->operation_status), $row->message === null ? null : (string)$row->message) : null;
     }
 
-    public function recordOutcome(string $subject, IncomingOperation $operation, PushOutcome $outcome): void
+    public function lockedOutcome(string $subject, string $client, string $operation): ?PushOutcome
     {
-        $this->database->table('pam_sync_operations')->insertOrIgnore([
-            'subject_id'=>$subject,'client_id'=>$operation->clientIdentifier,'operation_id'=>$operation->identifier,
-            'collection_name'=>$operation->collection,'record_id'=>$operation->recordIdentifier,
-            'operation_kind'=>$operation->kind->value,'operation_status'=>$outcome->status->value,
-            'message'=>$outcome->message,'created_at'=>now(),'updated_at'=>now(),
-        ]);
+        $row = $this->database->table('pam_sync_operations')
+            ->where([
+                'subject_id' => $subject,
+                'client_id' => $client,
+                'operation_id' => $operation,
+            ])
+            ->lockForUpdate()
+            ->first();
+
+        return $row
+            ? new PushOutcome(
+                $operation,
+                OperationStatus::from((int) $row->operation_status),
+                $row->message === null ? null : (string) $row->message,
+            )
+            : null;
+    }
+
+    public function claim(string $subject, IncomingOperation $operation): bool
+    {
+        return $this->database->table('pam_sync_operations')->insertOrIgnore([
+            'subject_id' => $subject,
+            'client_id' => $operation->clientIdentifier,
+            'operation_id' => $operation->identifier,
+            'collection_name' => $operation->collection,
+            'record_id' => $operation->recordIdentifier,
+            'operation_kind' => $operation->kind->value,
+            'operation_status' => OperationStatus::Processing->value,
+            'message' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]) === 1;
+    }
+
+    public function completeOutcome(
+        string $subject,
+        IncomingOperation $operation,
+        PushOutcome $outcome,
+    ): void {
+        $updated = $this->database->table('pam_sync_operations')
+            ->where([
+                'subject_id' => $subject,
+                'client_id' => $operation->clientIdentifier,
+                'operation_id' => $operation->identifier,
+                'operation_status' => OperationStatus::Processing->value,
+            ])
+            ->update([
+                'operation_status' => $outcome->status->value,
+                'message' => $outcome->message,
+                'updated_at' => now(),
+            ]);
+
+        if ($updated !== 1) {
+            throw new \LogicException('The claimed sync operation could not be completed.');
+        }
     }
 
     public function append(string $subject, AppliedChange $change): void
