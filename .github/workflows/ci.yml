@@ -37,8 +37,6 @@ jobs:
             "orchestra/testbench:${{ matrix.laravel.testbench }}" \
             --no-update --no-interaction
           composer update \
-            "laravel/framework:${{ matrix.laravel.version }}" \
-            "orchestra/testbench:${{ matrix.laravel.testbench }}" \
             --with-all-dependencies \
             --prefer-dist --no-interaction --no-progress
       - name: Run package contracts
