@@ -2,10 +2,21 @@
 
 The production Laravel counterpart for `pushinbr/pam-native-sync`: authenticated incremental pulls, idempotent mutation ingestion, HMAC-signed cursors, conflict responses, collection registration, retention boundaries, and a PAM Native transport adapter.
 
+## Start here
+
+This package runs in a Laravel application served by the PAM Runtime and pairs
+with `pushinbr/pam-native-sync` in the mobile application:
+
 ```bash
-composer require pushinbr/pam-native-sync-laravel
-php artisan vendor:publish --tag=pam-native-sync-config
-php artisan migrate
+curl --proto '=https' --proto-redir '=https' --tlsv1.2 \
+    --connect-timeout 15 --max-time 60 --max-filesize 1048576 -fsSL \
+    https://github.com/push-in/pam/releases/latest/download/install.sh | sh
+
+cd my-laravel-app
+pam composer require pushinbr/pam-native-sync-laravel
+pam artisan vendor:publish --tag=pam-native-sync-config
+pam artisan migrate
+pam doctor
 ```
 
 ```php
