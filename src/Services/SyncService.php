@@ -13,9 +13,9 @@ use Pam\Native\LaravelSync\Domain\OperationStatus;
 use Pam\Native\LaravelSync\Domain\PushOutcome;
 use Pam\Native\LaravelSync\Domain\SyncConflictException;
 use Pam\Native\LaravelSync\Domain\SyncEnvelope;
+use Pam\Native\LaravelSync\Domain\SyncOperationKind;
 use Pam\Native\LaravelSync\Repositories\SyncRepository;
 use Pam\Native\LaravelSync\SyncCollectionRegistry;
-use Pam\Native\Sync\SyncOperationKind;
 use Throwable;
 
 final readonly class SyncService

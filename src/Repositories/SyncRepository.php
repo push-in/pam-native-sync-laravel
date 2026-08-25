@@ -9,7 +9,7 @@ use Pam\Native\LaravelSync\Domain\AppliedChange;
 use Pam\Native\LaravelSync\Domain\IncomingOperation;
 use Pam\Native\LaravelSync\Domain\OperationStatus;
 use Pam\Native\LaravelSync\Domain\PushOutcome;
-use Pam\Native\Sync\SyncOperationKind;
+use Pam\Native\LaravelSync\Domain\SyncOperationKind;
 
 final readonly class SyncRepository
 {

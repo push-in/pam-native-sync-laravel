@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pam\Native\LaravelSync\Tests;
 
 use Pam\Native\LaravelSync\Domain\OperationStatus;
+use Pam\Native\LaravelSync\Domain\SyncOperationKind;
 use Pam\Native\LaravelSync\SyncCollectionRegistry;
 
 final class SyncEndpointTest extends TestCase
@@ -63,7 +64,7 @@ final class SyncEndpointTest extends TestCase
     public function testDeletePayloadAndTamperedCursorAreRejected(): void
     {
         $delete = $this->payload('op-delete');
-        $delete['operations'][0]['kind'] = 2;
+        $delete['operations'][0]['kind'] = SyncOperationKind::Delete->value;
         $this->postJson('/pam-native/sync', $delete)
             ->assertUnprocessable()
             ->assertJsonValidationErrors('operations.0.payload');
@@ -91,6 +92,7 @@ final class SyncEndpointTest extends TestCase
     public function testOperationStatusProtocolIsSequential(): void
     {
         $this->assertSame([1, 2, 3, 4], array_column(OperationStatus::cases(), 'value'));
+        $this->assertSame([1, 2], array_column(SyncOperationKind::cases(), 'value'));
     }
 
     /** @return array<string, mixed> */
