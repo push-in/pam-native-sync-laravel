@@ -3,15 +3,13 @@
 
 # PAM Native Sync for Laravel
 
-**A production server endpoint for the PAM Native Sync protocol.**
+**A production Laravel sync endpoint that remains independent from every mobile SDK.**
 
-Connect PAM Native outboxes and cursors to Laravel with validated requests, transactional services, repositories, and typed resources.
+Serve the stable integer-coded sync protocol to PAM Native, web, desktop, or any other client with validated requests, transactional services, repositories, and typed resources.
 
 [![Latest version](https://img.shields.io/packagist/v/pushinbr/pam-native-sync-laravel?style=flat-square&label=stable)](https://packagist.org/packages/pushinbr/pam-native-sync-laravel)
 [![CI](https://img.shields.io/github/actions/workflow/status/push-in/pam-native-sync-laravel/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/push-in/pam-native-sync-laravel/actions)
 ![PHP](https://img.shields.io/badge/PHP-8.5-777BB4?style=flat-square&logo=php&logoColor=white)
-![Android](https://img.shields.io/badge/Android-API%2026%2B-3DDC84?style=flat-square&logo=android&logoColor=white)
-![iOS](https://img.shields.io/badge/iOS-15%2B-000000?style=flat-square&logo=apple&logoColor=white)
 
 **[Documentation](https://push-in.github.io/pam-docs/native/overview/) · [Quick start](#quick-start) · [What you can build](#what-you-can-build) · [PAM ecosystem](https://push-in.github.io/pam-docs/ecosystem/) · [Issues](https://github.com/push-in/pam-native-sync-laravel/issues)**
 
@@ -21,14 +19,17 @@ Connect PAM Native outboxes and cursors to Laravel with validated requests, tran
 
 ## Why PAM Native Sync for Laravel
 
-Connect PAM Native outboxes and cursors to Laravel with validated requests, transactional services, repositories, and typed resources. The public API is strictly typed for PHP 8.5; expensive or frame-sensitive work stays in Rust or the platform SDK instead of crossing the application boundary every frame.
+Connect offline outboxes and cursors to Laravel with validated requests,
+transactional services, repositories, and typed resources. The package does
+not require PAM, PAM HTTP, PAM Native, or the mobile sync client. Frontend and
+backend can be installed, upgraded, tested, and deployed independently.
 
 | | |
 | --- | --- |
-| **Best for** | A focused capability you can add to any PAM Native application |
-| **Native path** | Laravel transport · PAM Sync protocol |
-| **Application model** | Composer package + generated native integration |
-| **Design rule** | Independent module; no feed, vertical, or application template bundled |
+| **Best for** | A Laravel backend serving offline-capable clients |
+| **Server path** | Form Request → service → repository → API Resources |
+| **Application model** | Ordinary Laravel Composer package |
+| **Design rule** | Wire-compatible but dependency-independent from every frontend |
 
 ## What you can build
 
@@ -38,17 +39,20 @@ Connect PAM Native outboxes and cursors to Laravel with validated requests, tran
 
 ## Quick start
 
-Already have a PAM Native project? Add only this capability:
+Install it only in the Laravel backend:
 
 ```bash
-pam composer require pushinbr/pam-native-sync-laravel
-pam doctor --fix
+composer require pushinbr/pam-native-sync-laravel
 ```
 
-New to PAM? Follow the **[five-minute PAM Native setup](https://push-in.github.io/pam-docs/native/overview/)** once, then return here. Your application stays a normal Composer project with a committed lockfile.
+The mobile application separately installs whichever sync client it chooses.
+`pushinbr/pam-native-sync` is one compatible client, not a server dependency.
 <!-- pam:product-page:end -->
 
-The production Laravel counterpart for `pushinbr/pam-native-sync`: authenticated incremental pulls, idempotent mutation ingestion, HMAC-signed cursors, conflict responses, collection registration, retention boundaries, and a PAM Native transport adapter.
+The server provides authenticated incremental pulls, idempotent mutation
+ingestion, HMAC-signed cursors, conflict responses, collection registration,
+and retention boundaries. Its JSON protocol uses sequential integer enums and
+does not expose PHP class names or framework-specific objects.
 
 ## See it in action
 
@@ -58,8 +62,12 @@ $registry->register('notes', new NotesSyncHandler());
 ```
 
 ```php
-// Mobile application
-$engine = new SyncEngine($store, new LaravelSyncTransport($http, $baseUrl));
+// PAM Native application (in its own repository/process)
+$engine = new SyncEngine($store, new HttpSyncTransport(
+    endpoint: $baseUrl.'/sync',
+    clientIdentifier: $deviceId,
+    tokenProvider: fn (): ?string => $token,
+));
 $engine->synchronize(fn (SyncReport $report) => updateSyncStatus($report));
 ```
 
